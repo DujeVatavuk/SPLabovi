@@ -1,59 +1,107 @@
-//#include <stdio.h>
-//
-//int main() {
-//	printf("Hello World");
-//	return 0;
-//}
-
 #define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <stdlib.h>
 
-typedef struct {
-	char ime[10];
-	char prezime[10];
-	double bodovi;
+#define MAX_SIZE (128)
+#define MAX_LINE (1024)
+#define MAX_POINTS (15)
+
+typedef struct _student 
+{
+	char name[MAX_SIZE];
+	char surname[MAX_SIZE];
+	double points;
 } student;
 
-int upis(FILE* fp, student* s, int n);
+int readNoRowsInFile();
+student* allocateMemoryAndReadStudents(int noStudents);
+double calculateRelativePoints(double points);
+int showStudents(int noStudents, student* students);
 
 int main()
 {
-	int n = 0;
-	FILE* fp = NULL;
-	fp = fopen("studenti.txt", "r");
-	if (fp == NULL)
+	int noRows = 0;
+	student* students = NULL;
+
+	noRows = readNoRowsInFile();
+	if (noRows > 0)
 	{
-		printf("Datoteka nije pronadena!\n");
-		return 1;
-	}
-	while (!feof(fp))
-	{
-		if (fgetc(fp) == '\n')
-			n++;
+		students = allocateMemoryAndReadStudents(noRows);
+		showStudents(noRows, students);
+
+		free(students);
 	}
 
-	student* stud = NULL;
-	stud = (student*)malloc(n * sizeof(student));
-	if (stud == NULL)
-	{
-		printf("Neuspjesna alokacija memorije!\n");
-	}
-	rewind(fp);
-	upis(fp, stud, n);
-	fclose(fp);
 	return 0;
 }
 
-int upis(FILE* fp, student* s, int n)
+int readNoRowsInFile()
 {
-	int i, max = 100;
-	double r;
-	for (i = 0; i < n; i++)
+	int counter = 0;
+	FILE* filePointer = NULL;
+	char buffer[MAX_SIZE] = { 0 };
+
+	filePointer = fopen("students.txt", "r");
+	if (!filePointer)
 	{
-		fscanf(fp, "%s %s %lf\n", (*(s + i)).ime, (*(s + i)).prezime, &(*(s + i)).bodovi);
-		r = s[i].bodovi / max * 100;
-		printf("Ime i prezime: %s \t%s\t Bodovi: %.2lf\t  Relativni bodovi: %.2lf\n", (*(s + i)).ime, (*(s + i)).prezime, (*(s + i)).bodovi, r);
+		printf("Neuspjesno otvaranje datoteke!\n");
+		return -1;
 	}
+	while (!feof(filePointer))
+	{
+		fgets(buffer, MAX_SIZE, filePointer);
+		counter++;
+	}
+
+	fclose(filePointer);
+	
+	return counter;
+}
+
+student* allocateMemoryAndReadStudents(int noStudents)
+{
+	int counter = 0;
+	FILE* filePointer = NULL;
+	student* students = NULL;
+
+	students = (student*)malloc(noStudents * sizeof(student));
+	if (!students)
+	{
+		printf("Neuspjesna alokacija memorije!\n");
+		return NULL;
+	}
+
+	filePointer = fopen("students.txt", "r");
+	if (!filePointer)
+	{
+		printf("Neuspjesno otvaranje datoteke!\n");
+		return NULL;
+	}
+	while (!feof(filePointer))
+	{
+		fscanf(filePointer, " %s %s %lf", students[counter].name, students[counter].surname, &students[counter].points);
+		counter++;
+	}
+
+	fclose(filePointer);
+
+	return students;
+}
+
+double calculateRelativePoints(double points)
+{
+	return ((points / MAX_POINTS) * 100);
+}
+
+int showStudents(int noStudents, student* students)
+{
+	int counter = 0;
+
+	for (counter; counter < noStudents; counter++)
+	{
+		printf("Name: %s\t Surname: %s\t Absolute points: %.2lf\t Relative points: %.2lf%\t\n", students[counter].name, 
+			students[counter].surname, students[counter].points, calculateRelativePoints(students[counter].points));
+	}
+
 	return 0;
 }
