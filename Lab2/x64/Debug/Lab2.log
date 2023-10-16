@@ -1,0 +1,4 @@
+﻿  lab2.c
+C:\Users\duje\OneDrive\Desktop\StrukturePodataka\SPLabovi\Lab2\lab2.c(194,7): warning C4013: 'tolower' undefined; assuming extern returning int
+C:\Users\duje\OneDrive\Desktop\StrukturePodataka\SPLabovi\Lab2\lab2.c(228): warning C4172: returning address of local variable or temporary: surname
+  Lab2.vcxproj -> C:\Users\duje\OneDrive\Desktop\StrukturePodataka\SPLabovi\Lab2\x64\Debug\Lab2.exe
