@@ -17,28 +17,28 @@ typedef struct _Person
 	Position next;
 } Person;
 
-int AppendList(Position head);
-int AddToEndOfList(Position head);
-int PrintList(Position first);
-int FindPerson(Position head);
-int DeletePerson(Position head);
-Position CreatePerson();
-Position FindLast(Position head);
-int PrintPerson(Position person);
-int Menu(Position head);
-char* WishedSurname();
+int appendList(Position head);
+int addToEndOfList(Position head);
+int printList(Position first);
+int findPerson(Position head);
+int deletePerson(Position head);
+Position createPerson();
+Position findLast(Position head);
+int printPerson(Position person);
+int menu(Position head);
+char* wishedSurname();
 
 int main(int argc, char** argv)
 {
 	Person Head = { .next = NULL, .name = {0},
 				.surname = {0}, .birthYear = 0 };
-	Menu(&Head);
+	menu(&Head);
 
 
 	return EXIT_SUCCESS;
 }
 
-Position CreatePerson()
+Position createPerson()
 {
 	Position newPerson = NULL;
 	char name[MAX_LENGTH] = { 0 };
@@ -67,11 +67,11 @@ Position CreatePerson()
 	return newPerson;
 }
 
-int AppendList(Position head)
+int appendList(Position head)
 {
 	Position newPerson = NULL;
 
-	newPerson = CreatePerson();
+	newPerson = createPerson();
 
 	if (newPerson)
 	{
@@ -82,7 +82,7 @@ int AppendList(Position head)
 	return EXIT_SUCCESS;
 }
 
-Position FindLast(Position head)
+Position findLast(Position head)
 {
 	while (head->next != NULL)
 	{
@@ -92,15 +92,15 @@ Position FindLast(Position head)
 	return head;
 }
 
-int AddToEndOfList(Position head)
+int addToEndOfList(Position head)
 {
 	Position newPerson = NULL;
 
-	newPerson = CreatePerson();
+	newPerson = createPerson();
 
 	if (newPerson)
 	{
-		head = FindLast(head);
+		head = findLast(head);
 		newPerson->next = head->next;
 		head->next = newPerson;
 	}
@@ -108,7 +108,7 @@ int AddToEndOfList(Position head)
 	return EXIT_SUCCESS;
 }
 
-int PrintList(Position first)
+int printList(Position first)
 {
 	if (!first)
 	{
@@ -122,17 +122,17 @@ int PrintList(Position first)
 	return EXIT_SUCCESS;
 }
 
-int FindPerson(Position head)
+int findPerson(Position head)
 {
 	if (head->next)
 	{
-		while (head->next && strcmp(head->next->surname, WishedSurname()) != 0)
+		while (head->next && strcmp(head->next->surname, wishedSurname()) != 0)
 		{
 			head = head->next;
 		}
 		if (head->next)
 		{
-			PrintPerson(head->next);
+			printPerson(head->next);
 		}
 		else
 		{
@@ -147,20 +147,20 @@ int FindPerson(Position head)
 
 	return EXIT_SUCCESS;
 }
-int DeletePerson(Position head)
+int deletePerson(Position head)
 {
 	if (head->next)
 	{
 		Position previous = NULL;
 
-		while (head->next && strcmp(head->surname, WishedSurname()) != 0)
+		while (head->next && strcmp(head->surname, wishedSurname()) != 0)
 		{
 			previous = head;
 			head = head->next;
 		}
-		if (previous->next && strcmp(head->surname, WishedSurname()) == 0)
+		if (previous->next && strcmp(head->surname, wishedSurname()) == 0)
 		{
-			PrintPerson(head);
+			printPerson(head);
 			previous->next = head->next;
 			free(head);
 			printf("Deleted!\n");
@@ -179,7 +179,7 @@ int DeletePerson(Position head)
 	return EXIT_SUCCESS;
 }
 
-int PrintPerson(Position person)
+int printPerson(Position person)
 {
 	printf("Name: %s, surname: %s, birth year: %d, adress: %p\n",
 		person->name, person->surname, person->birthYear, person);
@@ -187,30 +187,30 @@ int PrintPerson(Position person)
 	return EXIT_SUCCESS;
 }
 
-int Menu(Position Head)
+int menu(Position Head)
 {
 	char choice = '\0';
 	while (1) {
 		printf("Enter A(Append list), E(Put at the end of list), P(Print list), S(Search), D(Delete), X(Exit)\n");
 		scanf(" %c", &choice);
 		if (tolower(choice) == 'a')
-			AppendList(Head);
+			appendList(Head);
 		else if (tolower(choice) == 'e')
-			AddToEndOfList(Head);
+			addToEndOfList(Head);
 		else if (tolower(choice) == 'p')
-			PrintList(Head->next);
+			printList(Head->next);
 		else if (tolower(choice) == 's')
 		{
-			while (FindPerson(Head) == -1)
+			while (findPerson(Head) == -1)
 			{
-				FindPerson(Head);
+				findPerson(Head);
 			}
 		}
 		else if (tolower(choice) == 'd')
 		{
-			while (DeletePerson(Head) == -1)
+			while (deletePerson(Head) == -1)
 			{
-				DeletePerson(Head);
+				deletePerson(Head);
 			}
 		}
 		else if (tolower(choice) == 'x')
@@ -221,7 +221,7 @@ int Menu(Position Head)
 	return EXIT_SUCCESS;
 }
 
-char* WishedSurname()
+char* wishedSurname()
 {
 	char surname[MAX_LENGTH] = { 0 };
 	printf("Enter surname of the wanted person:\n");
