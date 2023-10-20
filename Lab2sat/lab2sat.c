@@ -6,7 +6,8 @@
 #define MAX_LENGTH (50)
 #define NO_PERSON_FOUND (NULL)
 #define EMPTY_LIST (-1)
-#define NO_PERSON_FOUND_FOR_DELETE (-2)
+#define NO_PERSON_FOUND_INT (-2)
+#define SINGLE_PERSON_IN_LIST (-3)
 
 struct _Person;
 typedef struct _Person* Position;
@@ -22,11 +23,15 @@ Position createPerson();
 Position findLast(Position head);
 char* enterSurname();
 int printPerson(Position person);
-int addToFrontOfTheList(Position head);
-int addToEndOfTheList(Position head);
-int printList(Position firstElement);
-Position findPerson(Position firstElement);
+Position findPrevious(Position head);
+int swapItems(Position first, Position second);
+int insertAtFrontOfTheList(Position head);
+int insertAtEndOfTheList(Position head);
+int printList(Position firstItem);
+Position findPerson(Position firstItem);
 int deletePerson(Position head);
+int insertAfterPerson(Position person);
+int bubbleSort(Position firstItem);
 
 int main() {
 	Person head = { .next = NULL, .name = {0},
@@ -39,6 +44,7 @@ int main() {
 int menu(Position head) {
 	char choice = '\0';
 	Position person = NULL;
+	Position previous = NULL;
 	while (1) {
 		printf("Enter:  A(Add to the front of the list)\n\tE(Add to the end of list)\n\tP(Print list)\n\tS(Search)\n\tD(Delete)\n\tF(Add after item)\n\tB(Add before item)\n\tO(Sort)\n\tW(Write to file)\n\tR(Read from file)\n\tX(Exit)\n");
 		scanf(" %c", &choice);
@@ -46,12 +52,12 @@ int menu(Position head) {
 			// add item to the front of the list
 			case 'A':
 			case 'a':
-				addToFrontOfTheList(head);
+				insertAtFrontOfTheList(head);
 				continue;
 			// add item to the end of the list
 			case 'E':
 			case 'e':
-				addToEndOfTheList(head);
+				insertAtEndOfTheList(head);
 				continue;
 			// print list items
 			case 'P':
@@ -74,7 +80,7 @@ int menu(Position head) {
 					case EMPTY_LIST:
 						printf("List is empty!\n");
 						break;
-					case NO_PERSON_FOUND_FOR_DELETE:
+					case NO_PERSON_FOUND_INT:
 						printf("Can't find person with that surname!\n");
 						break;
 					default:
@@ -84,20 +90,32 @@ int menu(Position head) {
 			// add item to the list after some specified item
 			case 'F':
 			case 'f':
-				/*person = findPerson(head->next);
-				person ? printPerson(person) : printf("Can't find person with that surname!\n");*/
+				person = findPerson(head->next);
+				person ? insertAfterPerson(person) : printf("Can't find person with that surname!\n");
 				continue;
 			// add item to the list before some specified item
 			case 'B':
 			case 'b':
-				/*person = findPerson(head->next);
-				person ? printPerson(person) : printf("Can't find person with that surname!\n");*/
+				previous = findPrevious(head);
+				previous ? insertAfterPerson(previous) : printf("Can't find person with that surname!\n");
 				continue;
 			// sort items in list by surname
 			case 'O':
 			case 'o':
-				/*person = findPerson(head->next);
-				person ? printPerson(person) : printf("Can't find person with that surname!\n");*/
+				switch (bubbleSort(head->next)) {
+					case EXIT_SUCCESS:
+						printf("Sorted!\n");
+						printList(head->next);
+						break;
+					case EMPTY_LIST:
+						printf("List is empty!\n");
+						break;
+					case SINGLE_PERSON_IN_LIST:
+						printf("Single person in list, no use sorting!\n");
+						break;
+					default:
+						break;
+				}
 				continue;
 			// write items in list to the file
 			case 'W':
@@ -124,7 +142,7 @@ int menu(Position head) {
 	return EXIT_SUCCESS;
 }
 
-int addToFrontOfTheList(Position head) {
+int insertAtFrontOfTheList(Position head) {
 	Position newPerson = NULL;
 
 	newPerson = createPerson();
@@ -137,7 +155,7 @@ int addToFrontOfTheList(Position head) {
 	return EXIT_SUCCESS;
 }
 
-int addToEndOfTheList(Position head) {
+int insertAtEndOfTheList(Position head) {
 	Position newPerson = NULL;
 	Position last = NULL;
 
@@ -152,11 +170,13 @@ int addToEndOfTheList(Position head) {
 	return EXIT_SUCCESS;
 }
 
-int printList(Position firstElement) {
-	Position current = firstElement;
-	if (!firstElement) {
+int printList(Position firstItem) {
+	Position current = firstItem;
+
+	if (!firstItem) {
 		printf("Empty list!\n");
 	}
+
 	while (current) {
 		printPerson(current);
 		current = current->next;
@@ -165,14 +185,16 @@ int printList(Position firstElement) {
 	return EXIT_SUCCESS;
 }
 
-Position findPerson(Position firstElement)
+Position findPerson(Position firstItem)
 {
-	Position current = firstElement;
-	if (!firstElement) {
+	Position current = firstItem;
+	char surname[MAX_LENGTH] = { 0 };
+
+	if (!firstItem) {
 		printf("Empty list!\n");
 		return NO_PERSON_FOUND;
 	}
-	char surname[MAX_LENGTH] = { 0 };
+
 	strcpy(surname, enterSurname());
 	do {
 		if (strcmp(current->surname, surname) == 0) {
@@ -181,7 +203,7 @@ Position findPerson(Position firstElement)
 		else {
 			current = current->next;
 		}
-	} while (current->next != NULL);
+	} while (current != NULL);
 
 	return NO_PERSON_FOUND;
 }
@@ -190,6 +212,7 @@ int deletePerson(Position head)
 {
 	Position current = head;
 	char surname[MAX_LENGTH] = { 0 };
+
 	strcpy(surname, enterSurname());
 	if (head->next) {
 		Position previous = NULL;
@@ -205,12 +228,57 @@ int deletePerson(Position head)
 			free(current);
 		}
 		else {
-			return NO_PERSON_FOUND_FOR_DELETE;
+			return NO_PERSON_FOUND_INT;
 		}
 	}
 	else {
 		return EMPTY_LIST;
 	}
+
+	return EXIT_SUCCESS;
+}
+
+int insertAfterPerson(Position person) {
+	Position newPerson = NULL;
+
+	newPerson = createPerson();
+
+	if (newPerson) {
+		newPerson->next = person->next;
+		person->next = newPerson;
+	}
+
+	return EXIT_SUCCESS;
+}
+
+int bubbleSort(Position firstItem) {
+	int swapped = 0;
+	Position lastPersonRead = NULL;
+	Position start = firstItem;
+
+	// Return if the list is empty or has only one element
+	if (!firstItem) {
+		printf("Empty list!\n");
+		return NO_PERSON_FOUND_INT;
+	}
+	else if (!firstItem->next) {
+		printf("Only single element in list!\n");
+		return SINGLE_PERSON_IN_LIST;
+	}
+
+	do {
+		swapped = 0;
+		Position current = start;
+
+		while (current->next != lastPersonRead) {
+			if (strcmp(current->surname, current->next->surname) > 0) {
+				swapItems(current, current->next);
+				swapped = 1;
+			}
+			current = current->next;
+		}
+		lastPersonRead = current;
+	} while (swapped);
 
 	return EXIT_SUCCESS;
 }
@@ -242,8 +310,7 @@ Position createPerson() {
 	return newPerson;
 }
 
-Position findLast(Position head)
-{
+Position findLast(Position head) {
 	Position current = head;
 
 	while (current->next) {
@@ -253,8 +320,7 @@ Position findLast(Position head)
 	return current;
 }
 
-char* enterSurname()
-{
+char* enterSurname() {
 	char surname[MAX_LENGTH] = { 0 };
 	printf("Enter surname of the wanted person:\n");
 	scanf(" %s", surname);
@@ -263,6 +329,48 @@ char* enterSurname()
 }
 
 int printPerson(Position person) {
-	printf("Name: %s\t Surname: %s\t Birth year: %d\t\n", person->name, person->surname, person->birthYear);
+	printf("\033[0;32mName: %s\t Surname: %s\t Birth year: %d\t\n\033[0m", person->name, person->surname, person->birthYear);
+	return EXIT_SUCCESS;
+}
+
+Position findPrevious(Position head) {
+	Position current = head;
+	char surname[MAX_LENGTH] = { 0 };
+
+	if (!head->next) {
+		printf("Empty list!\n");
+		return NO_PERSON_FOUND;
+	}
+
+	strcpy(surname, enterSurname());
+	do {
+		if (strcmp(current->next->surname, surname) == 0) {
+			return current;
+		}
+		else {
+			current = current->next;
+		}
+	} while (current->next != NULL);
+
+	return NO_PERSON_FOUND;
+}
+
+int swapItems(Position first, Position second) {
+	char tempName[MAX_LENGTH];
+	char tempSurname[MAX_LENGTH];
+	int tempBirthYear;
+
+	strcpy(tempName, first->name);
+	strcpy(tempSurname, first->surname);
+	tempBirthYear = first->birthYear;
+
+	strcpy(first->name, second->name);
+	strcpy(first->surname, second->surname);
+	first->birthYear = second->birthYear;
+
+	strcpy(second->name, tempName);
+	strcpy(second->surname, tempSurname);
+	second->birthYear = tempBirthYear;
+
 	return EXIT_SUCCESS;
 }
