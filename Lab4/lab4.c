@@ -17,18 +17,19 @@ typedef struct _Element {
 } Element;
 
 int readFile(Position headPoly1, Position headPoly2, char* fileName);
-int parseStringIntoList(Position head, char* buffer);
-int deleteAfter(Position previous);
-int insertAfter(Position position, Position newElement);
-int insertSorted(Position head, Position newElement);
-int mergeAfter(Position position, Position newElement);
-Position createElement(int coefficient, int exponent);
 int printPoly(char* polynomeName, Position first);
-int createAndInsertAfter(int coefficient, int exponent, Position position);
 int addPoly1(Position resultHead, Position headPoly1, Position headPoly2);
 //int addPoly2(Position resultHead, Position headPoly1, Position headPoly2);
 int multiplyPoly(Position resultHead, Position headPoly1, Position headPoly2);
 int freeMemory(Position head);
+int parseStringIntoList(Position head, char* buffer);
+Position createElement(int coefficient, int exponent);
+int insertSorted(Position head, Position newElement);
+int mergeAfter(Position current, Position newElement);
+int insertAfter(Position current, Position newElement);
+int deleteAfter(Position previous);
+int createAndInsertAfter(int coefficient, int exponent, Position current);
+
 
 
 int main() {
@@ -52,6 +53,12 @@ int main() {
 		freeMemory(&headPoly2);
 		freeMemory(&headPolyAdd);
 		freeMemory(&headPolyMultiply);
+
+		// test if we freed memory
+		/*printPoly("First polynome: ", headPoly1.next);
+		printPoly("Second polynome: ", headPoly2.next);
+		printPoly("Added polynomes: ", headPolyAdd.next);
+		printPoly("Multiplied polynomes: ", headPolyMultiply.next);*/
 	}
 
 	return EXIT_SUCCESS;
@@ -83,104 +90,6 @@ int readFile(Position headPoly1, Position headPoly2, char* fileName) {
 	fclose(filePointer);
 
 	return EXIT_SUCCESS;
-}
-
-int parseStringIntoList(Position head, char* buffer)
-{
-	char* currentBuffer = buffer;
-	int coefficient = 0;
-	int exponent = 0;
-	int numBytes = 0;
-	int status = 0;
-	Position newElement = NULL;
-
-	while (strlen(currentBuffer) > 0) {
-		status = sscanf(currentBuffer, " %d %d %n", &coefficient, &exponent, &numBytes);
-		//On success, the sscanf returns the number of variables filled
-		if (status != 2) {
-			printf("This file is not good!\n");
-			return EXIT_FAILURE;
-		}
-
-		newElement = createElement(coefficient, exponent);
-		if (!newElement) {
-			return EXIT_FAILURE;
-		}
-
-		insertSorted(head, newElement);
-
-		currentBuffer += numBytes;
-	}
-
-	return EXIT_SUCCESS;
-}
-
-int deleteAfter(Position previous) {
-	Position toDelete = NULL;
-
-	toDelete = previous->next;
-	previous->next = toDelete->next;
-	free(toDelete);
-
-	return EXIT_SUCCESS;
-}
-
-int insertAfter(Position position, Position newElement) {
-	newElement->next = position->next;
-	position->next = newElement;
-
-	return EXIT_SUCCESS;
-}
-
-int mergeAfter(Position position, Position newElement) {
-	// new element doesn't have same exponent as previous
-	if (position->next == NULL || position->next->exponent != newElement->exponent) {
-		insertAfter(position, newElement);
-	}
-	// new element has same exponent as previous so they need to be merged
-	else {
-		int resultCoefficient = position->next->coefficient + newElement->coefficient;
-		// if coeff sum is 0 that element dissapears
-		if (resultCoefficient == 0)
-		{
-			deleteAfter(position);
-		}
-		else
-		{
-			position->next->coefficient = resultCoefficient;
-		}
-		free(newElement);
-	}
-
-	return EXIT_SUCCESS;
-}
-
-int insertSorted(Position head, Position newElement) {
-	Position current = head;
-
-	while (current->next != NULL && current->next->exponent > newElement->exponent) {
-		current = current->next;
-	}
-
-	mergeAfter(current, newElement);
-
-	return EXIT_SUCCESS;
-}
-
-Position createElement(int coefficient, int exponent) {
-	Position element = NULL;
-
-	element = (Position)malloc(sizeof(Element));
-	if (!element) {
-		printf("Can't allocate memory!\n");
-		return FAILED_MEMORY_ALLOCATION;
-	}
-
-	element->coefficient = coefficient;
-	element->exponent = exponent;
-	element->next = NULL;
-
-	return element;
 }
 
 int printPoly(char* polynomeName, Position first) {
@@ -237,18 +146,6 @@ int printPoly(char* polynomeName, Position first) {
 
 	printf("\n");
 	return EXIT_SUCCESS;
-}
-
-int createAndInsertAfter(int coefficient, int exponent, Position position) {
-	Position newElement = createElement(coefficient, exponent);
-	if (!newElement) {
-		return EXIT_FAILURE;
-	}
-
-	insertAfter(position, newElement);
-
-	return EXIT_SUCCESS;
-
 }
 
 int addPoly1(Position resultHead, Position firstElementPoly1, Position firstElementPoly2) {
@@ -337,7 +234,6 @@ int multiplyPoly(Position resultHead, Position firstElementPoly1, Position first
 		return EXIT_SUCCESS;
 	}
 	return EMPTY_LISTS;
-	
 }
 
 int freeMemory(Position head)
@@ -347,6 +243,117 @@ int freeMemory(Position head)
 	while (current->next) {
 		deleteAfter(current);
 	}
+
+	return EXIT_SUCCESS;
+}
+
+int parseStringIntoList(Position head, char* buffer)
+{
+	char* currentBuffer = buffer;
+	int coefficient = 0;
+	int exponent = 0;
+	int numBytes = 0;
+	int status = 0;
+	Position newElement = NULL;
+
+	while (strlen(currentBuffer) > 0) {
+		status = sscanf(currentBuffer, " %dx^%d %n", &coefficient, &exponent, &numBytes);
+		//On success, the sscanf returns the number of variables filled (it has to be 2!)
+		if (status != 2) {
+			printf("This file is not good!\n");
+			return EXIT_FAILURE;
+		}
+
+		newElement = createElement(coefficient, exponent);
+		if (!newElement) {
+			return EXIT_FAILURE;
+		}
+
+		insertSorted(head, newElement);
+
+		// since currentBuffer is a memory address of the first character, adding numBytes moves pointer to the next and next... character untill it is at the end
+		currentBuffer += numBytes;
+	}
+
+	return EXIT_SUCCESS;
+}
+
+Position createElement(int coefficient, int exponent) {
+	Position element = NULL;
+
+	element = (Position)malloc(sizeof(Element));
+	if (!element) {
+		printf("Can't allocate memory!\n");
+		return FAILED_MEMORY_ALLOCATION;
+	}
+
+	element->coefficient = coefficient;
+	element->exponent = exponent;
+	element->next = NULL;
+
+	return element;
+}
+
+int insertSorted(Position head, Position newElement) {
+	Position current = head;
+
+	// checks exponents so it can be sorted
+	while (current->next != NULL && current->next->exponent > newElement->exponent) {
+		current = current->next;
+	}
+
+	mergeAfter(current, newElement);
+
+	return EXIT_SUCCESS;
+}
+
+int mergeAfter(Position current, Position newElement) {
+	// new element doesn't have same exponent as previous
+	if (current->next == NULL || current->next->exponent != newElement->exponent) {
+		insertAfter(current, newElement);
+	}
+	// new element has same exponent as previous so they need to be merged
+	else {
+		int resultCoefficient = current->next->coefficient + newElement->coefficient;
+		// if coeff sum is 0 that element dissapears
+		if (resultCoefficient == 0)
+		{
+			deleteAfter(current);
+		}
+		else
+		{
+			current->next->coefficient = resultCoefficient;
+		}
+		free(newElement);
+	}
+
+	return EXIT_SUCCESS;
+}
+
+int insertAfter(Position current, Position newElement) {
+	newElement->next = current->next;
+	current->next = newElement;
+
+	return EXIT_SUCCESS;
+}
+
+int deleteAfter(Position previous) {
+	Position toDelete = NULL;
+
+	toDelete = previous->next;
+	previous->next = toDelete->next;
+	free(toDelete);
+
+	return EXIT_SUCCESS;
+}
+
+int createAndInsertAfter(int coefficient, int exponent, Position current) {
+	Position newElement = createElement(coefficient, exponent);
+	if (!newElement) {
+		return EXIT_FAILURE;
+	}
+
+	insertAfter(current, newElement);
 
 	return EXIT_SUCCESS;
 }
