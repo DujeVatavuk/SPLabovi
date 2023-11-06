@@ -1,2 +1,3 @@
 ﻿  Lab5.c
+C:\Users\duje\OneDrive\Desktop\StrukturePodataka\SPLabovi\Lab5\Lab5.c(59,9): warning C4047: 'return': 'int' differs in levels of indirection from 'void *'
   Lab5.vcxproj -> C:\Users\duje\OneDrive\Desktop\StrukturePodataka\SPLabovi\Lab5\x64\Debug\Lab5.exe

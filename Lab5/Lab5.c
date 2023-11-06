@@ -14,9 +14,9 @@ typedef struct _stackElement {
 } StackElement;
 
 
-int calculatePostfixFromFile(char* fileName, double* result);
-char* readFile(char* fileName, char* buffer);
-int parseStringIntoPostfix(char* buffer, double* result);
+int calculatePostfixFromFile(Position head, char* fileName, double* result);
+int readFile(char* fileName, char* buffer);
+int parseStringIntoPostfix(Position head, char* buffer, double* result);
 int checkStackAndExtractResult(Position head, double* result);
 Position createStackElement(double number);
 int push(Position head, Position newStackElement);
@@ -24,44 +24,37 @@ int printStack(Position first);
 int pop(Position head, double* result);
 int popAndPerformOperation(Position head, char operation, double* result);
 
-int main()
-{
+int main() {
+    StackElement head = { .number = 0, .next = NULL };
 	double result = 0;
 
-    if (calculatePostfixFromFile("postfix.txt", &result) == EXIT_SUCCESS)
-    {
+    if (calculatePostfixFromFile(&head, "postfix.txt", &result) == EXIT_SUCCESS) {
         printf("Result is: %0.1lf\n", result);
     }
 
 	return EXIT_SUCCESS;
 }
 
-int calculatePostfixFromFile(char* fileName, double* result)
-{
+int calculatePostfixFromFile(Position head, char* fileName, double* result) {
     char buffer[MAX_LENGTH] = { 0 };
     int status = 0;
 
-    readFile(fileName, buffer);
-    if (!buffer)
-    {
+    if (readFile(fileName, buffer) != EXIT_SUCCESS || !buffer) {
         return EXIT_FAILURE;
     }
 
-    status = parseStringIntoPostfix(buffer, result);
-    if (status != EXIT_SUCCESS)
-    {
+    status = parseStringIntoPostfix(head, buffer, result);
+    if (status != EXIT_SUCCESS) {
         return EXIT_FAILURE;
     }
 
     return EXIT_SUCCESS;
 }
 
-char* readFile(char* fileName, char* buffer)
-{
+int readFile(char* fileName, char* buffer) {
     FILE* filePointer = NULL;
     filePointer = fopen(fileName, "r");
-    if (!filePointer)
-    {
+    if (!filePointer) {
         perror("Can't open file!\n");
         return NULL;
     }
@@ -71,12 +64,11 @@ char* readFile(char* fileName, char* buffer)
 
     fclose(filePointer);
 
-    return buffer;
+    return EXIT_SUCCESS;
 }
 
-int parseStringIntoPostfix(char* buffer, double* result)
+int parseStringIntoPostfix(Position head, char* buffer, double* result)
 {
-    StackElement head = { .number = 0, .next = NULL };
     char* currentBuffer = buffer;
     int status = 0;
     int numBytes = 0;
@@ -84,13 +76,11 @@ int parseStringIntoPostfix(char* buffer, double* result)
     double number = 0.0;
     Position newStackElement = NULL;
 
-    while (strlen(currentBuffer) > 0)
-    {
+    while (strlen(currentBuffer) > 0) {
         status = sscanf(currentBuffer, " %lf %n", &number, &numBytes);
-        if (status != 1)
-        {
+        if (status != 1) {
             sscanf(currentBuffer, " %c %n", &operation, &numBytes);
-            status = popAndPerformOperation(&head, operation, result);
+            status = popAndPerformOperation(head, operation, result);
 
             if (status != EXIT_SUCCESS) {
                 return EXIT_FAILURE;
@@ -100,21 +90,19 @@ int parseStringIntoPostfix(char* buffer, double* result)
         }
 
         newStackElement = createStackElement(number);
-        if (!newStackElement)
-        {
+        if (!newStackElement) {
             return EXIT_FAILURE;
         }
 
         currentBuffer += numBytes;
         printf("|%s| <-->", currentBuffer);
-        push(&head, newStackElement);
+        push(head, newStackElement);
     }
 
-    return checkStackAndExtractResult(&head, result);
+    return checkStackAndExtractResult(head, result);
 }
 
-int checkStackAndExtractResult(Position head, double* result)
-{
+int checkStackAndExtractResult(Position head, double* result) {
     int status = EXIT_SUCCESS;
 
     status = pop(head, result);
@@ -124,7 +112,7 @@ int checkStackAndExtractResult(Position head, double* result)
     }
 
     if (head->next) {
-        system("cls");
+        system("cls"); //clear screen
         printf("Invalid postfix, please check the file!\r\n");
         return EXIT_FAILURE;
     }
@@ -137,8 +125,7 @@ Position createStackElement(double number)
     Position newStackElement = NULL;
 
     newStackElement = (Position)malloc(sizeof(StackElement));
-    if (!newStackElement)
-    {
+    if (!newStackElement) {
         perror("Can't allocate memory!\n");
         return NULL;
     }
@@ -149,8 +136,7 @@ Position createStackElement(double number)
     return newStackElement;
 }
 
-int push(Position head, Position newStackElement)
-{
+int push(Position head, Position newStackElement) {
     newStackElement->next = head->next;
     head->next = newStackElement;
 
@@ -159,12 +145,10 @@ int push(Position head, Position newStackElement)
     return EXIT_SUCCESS;
 }
 
-int printStack(Position first)
-{
+int printStack(Position first) {
     Position current = first;
 
-    while (current)
-    {
+    while (current) {
         printf(" %0.1lf", current->number);
         current = current->next;
     }
@@ -173,13 +157,11 @@ int printStack(Position first)
     return EXIT_SUCCESS;
 }
 
-int pop(Position head, double* result)
-{
+int pop(Position head, double* result) {
     Position toDelete = NULL;
 
     toDelete = head->next;
-    if (!toDelete)
-    {
+    if (!toDelete) {
         printf("Stack is empty! Nothing to pop!\n");
         return -1;
     }
@@ -191,8 +173,7 @@ int pop(Position head, double* result)
     return EXIT_SUCCESS;
 }
 
-int popAndPerformOperation(Position head, char operation, double* result)
-{
+int popAndPerformOperation(Position head, char operation, double* result) {
     double operand1 = 0;
     double operand2 = 0;
     int status1 = 0;
@@ -208,8 +189,7 @@ int popAndPerformOperation(Position head, char operation, double* result)
         return EXIT_FAILURE;
     }
 
-    switch (operation)
-    {
+    switch (operation) {
     case '+':
         *result = operand2 + operand1;
         break;
