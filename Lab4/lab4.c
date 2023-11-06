@@ -18,8 +18,8 @@ typedef struct _Element {
 
 int readFile(Position headPoly1, Position headPoly2, char* fileName);
 int printPoly(char* polynomeName, Position first);
-int addPoly1(Position resultHead, Position headPoly1, Position headPoly2);
-//int addPoly2(Position resultHead, Position headPoly1, Position headPoly2);
+int addPoly1(Position resultHead, Position firstElementPoly1, Position firstElementPoly2);
+//int addPoly2(Position resultHead, Position firstElementPoly1, Position firstElementPoly2);
 int multiplyPoly(Position resultHead, Position headPoly1, Position headPoly2);
 int freeMemory(Position head);
 int parseStringIntoList(Position head, char* buffer);
@@ -190,12 +190,12 @@ int addPoly1(Position resultHead, Position firstElementPoly1, Position firstElem
 	return EXIT_SUCCESS;
 }
 
-//int addPoly2(Position resultHead, Position headPoly1, Position headPoly2)
+//int addPoly2(Position resultHead, Position firstElementPoly1, Position firstElementPoly2)
 //{
-//	Position currentPoly1 = NULL;
-//	Position currentPoly2 = NULL;
+//	Position currentPoly1 = firstElementPoly1;
+//	Position currentPoly2 = firstElementPoly2;
 //
-//	for (currentPoly1 = headPoly1->next; currentPoly1 != NULL; currentPoly1 = currentPoly1->next)
+//	for (; currentPoly1 != NULL; currentPoly1 = currentPoly1->next)
 //	{
 //		Position newElement = createElement(currentPoly1->coefficient, currentPoly1->exponent);
 //		if (!newElement)
@@ -205,7 +205,7 @@ int addPoly1(Position resultHead, Position firstElementPoly1, Position firstElem
 //
 //		insertSorted(resultHead, newElement);
 //	}
-//	for (currentPoly2 = headPoly2->next; currentPoly2 != NULL; currentPoly2 = currentPoly2->next)
+//	for (; currentPoly2 != NULL; currentPoly2 = currentPoly2->next)
 //	{
 //		Position newElement = createElement(currentPoly2->coefficient, currentPoly2->exponent);
 //		if (!newElement)
@@ -220,20 +220,20 @@ int addPoly1(Position resultHead, Position firstElementPoly1, Position firstElem
 
 int multiplyPoly(Position resultHead, Position firstElementPoly1, Position firstElementPoly2)
 {
-	if (firstElementPoly1 != NULL || firstElementPoly2 != NULL) {
-		for (Position currentPoly1 = firstElementPoly1; currentPoly1 != NULL; currentPoly1 = currentPoly1->next) {
-			for (Position currentPoly2 = firstElementPoly2; currentPoly2 != NULL; currentPoly2 = currentPoly2->next) {
-				Position newElement = createElement(currentPoly1->coefficient * currentPoly2->coefficient, currentPoly1->exponent + currentPoly2->exponent);
-				if (!newElement) {
-					return EXIT_FAILURE;
-				}
-
-				insertSorted(resultHead, newElement);
+	if (firstElementPoly1 == NULL || firstElementPoly2 == NULL) 
+		return EMPTY_LISTS;
+	for (Position currentPoly1 = firstElementPoly1; currentPoly1 != NULL; currentPoly1 = currentPoly1->next) {
+		for (Position currentPoly2 = firstElementPoly2; currentPoly2 != NULL; currentPoly2 = currentPoly2->next) {
+			Position newElement = createElement(currentPoly1->coefficient * currentPoly2->coefficient, currentPoly1->exponent + currentPoly2->exponent);
+			if (!newElement) {
+				return EXIT_FAILURE;
 			}
+
+			insertSorted(resultHead, newElement);
 		}
-		return EXIT_SUCCESS;
 	}
-	return EMPTY_LISTS;
+	return EXIT_SUCCESS;
+	
 }
 
 int freeMemory(Position head)
