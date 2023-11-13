@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <ProjectOutputs>
+    <ProjectOutput>
+      <FullPath>C:\Users\duje\OneDrive\Desktop\StrukturePodataka\SPLabovi\Lab6\x64\Debug\Lab6.exe</FullPath>
+    </ProjectOutput>
+  </ProjectOutputs>
+  <ContentFiles>
+    <ContentFile>
+      <FullPath>C:\Users\duje\OneDrive\Desktop\StrukturePodataka\SPLabovi\Lab6\racun20231112.txt</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\Users\duje\OneDrive\Desktop\StrukturePodataka\SPLabovi\Lab6\racun20231114.txt</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\Users\duje\OneDrive\Desktop\StrukturePodataka\SPLabovi\Lab6\racun20231115.txt</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\Users\duje\OneDrive\Desktop\StrukturePodataka\SPLabovi\Lab6\racun220231112.txt</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\Users\duje\OneDrive\Desktop\StrukturePodataka\SPLabovi\Lab6\racun220231115.txt</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\Users\duje\OneDrive\Desktop\StrukturePodataka\SPLabovi\Lab6\racun320231115.txt</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\Users\duje\OneDrive\Desktop\StrukturePodataka\SPLabovi\Lab6\racuni.txt</FullPath>
+    </ContentFile>
+    <ContentFile>
+      <FullPath>C:\Users\duje\OneDrive\Desktop\StrukturePodataka\SPLabovi\Lab6\racun20231113.txt</FullPath>
+    </ContentFile>
+  </ContentFiles>
+  <SatelliteDlls />
+  <NonRecipeFileRefs />
+</Project>
