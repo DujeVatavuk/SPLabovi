@@ -42,6 +42,7 @@ int insertSortedNewReceipt(ReceiptPosition receiptHead, ReceiptPosition newRecei
 int mergeReceiptAfter(ReceiptPosition receiptCurrent, ReceiptPosition newReceipt);
 int insertReceiptAfter(ReceiptPosition receiptCurrent, ReceiptPosition newReceipt);
 int compareDates(char* date1, char* date2);
+int articleInBetweenDates(char* articleName, char* dateFrom, char* dateTo, ReceiptPosition receiptHead);
 
 int main() {
 	Receipt receiptHead = {
@@ -71,7 +72,7 @@ int main() {
 		}
 	}
 
-
+	articleInBetweenDates("Jabuka", "2023-11-10", "2023-11-17", receiptHead.next);
 
 	return EXIT_SUCCESS;
 }
@@ -280,4 +281,40 @@ int compareDates(char* date1, char* date2) {
 
 	// Dates are equal
 	return DATES_EQUAL;
+}
+
+int articleInBetweenDates(char* articleName, char* dateFrom, char* dateTo, ReceiptPosition receiptFirstElement) {
+	ReceiptPosition receiptFrom = NULL;
+	ReceiptPosition receiptTo = NULL;
+	ReceiptPosition receiptCurrent = NULL;
+	ArticlePosition articleCurrent = NULL;
+	int articleQuantity = 0;
+	double articlePrice = 0;
+
+	receiptCurrent = receiptFirstElement;
+	while (receiptCurrent != NULL) {
+		if (compareDates(dateFrom, receiptCurrent) != DATE2_EARLIER && receiptFrom == NULL)
+			receiptFrom = receiptCurrent;
+		if ((compareDates(dateTo, receiptCurrent) != DATE2_LATER && receiptTo == NULL) || receiptCurrent->next == NULL)
+			receiptTo = receiptCurrent;
+		receiptCurrent = receiptCurrent->next;
+	}
+
+	//printf("\n%s, %s", receiptFrom->receiptDate, receiptTo->receiptDate);
+
+
+	receiptCurrent = receiptFrom;
+	while (receiptCurrent != NULL && compareDates(receiptCurrent->receiptDate, receiptTo->receiptDate) != DATE2_EARLIER) {
+		articleCurrent = receiptCurrent->articleHead.next;
+		while (articleCurrent != NULL && strcmp(articleCurrent->name, articleName) < 0) {
+			articleCurrent = articleCurrent->next;
+		}
+		if (articleCurrent != NULL && strcmp(articleCurrent->name, articleName) == 0) {
+			articleQuantity += articleCurrent->quantity;
+			articlePrice += articleCurrent->price * (double)articleCurrent->quantity;
+		}
+		receiptCurrent = receiptCurrent->next;
+	}
+
+	printf("\n %d %.2lf", articleQuantity, articlePrice);
 }

@@ -1,3 +1,6 @@
 ﻿  lab6.c
-C:\Users\duje\OneDrive\Desktop\StrukturePodataka\SPLabovi\Lab6\lab6.c(116,3): warning C4047: 'return': 'ReceiptPosition' differs in levels of indirection from 'int'
+C:\Users\duje\OneDrive\Desktop\StrukturePodataka\SPLabovi\Lab6\lab6.c(119,3): warning C4047: 'return': 'ReceiptPosition' differs in levels of indirection from 'int'
+C:\Users\duje\OneDrive\Desktop\StrukturePodataka\SPLabovi\Lab6\lab6.c(296,30): warning C4133: 'function': incompatible types - from 'ReceiptPosition' to 'char *'
+C:\Users\duje\OneDrive\Desktop\StrukturePodataka\SPLabovi\Lab6\lab6.c(298,29): warning C4133: 'function': incompatible types - from 'ReceiptPosition' to 'char *'
+C:\Users\duje\OneDrive\Desktop\StrukturePodataka\SPLabovi\Lab6\lab6.c(320): warning C4716: 'articleInBetweenDates': must return a value
   Lab6.vcxproj -> C:\Users\duje\OneDrive\Desktop\StrukturePodataka\SPLabovi\Lab6\x64\Debug\Lab6.exe
