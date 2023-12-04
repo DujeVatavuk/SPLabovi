@@ -32,10 +32,10 @@ int main() {
         .subDirectories = NULL,
         .next = NULL
     };
-    Position firstDirectory = createDirectory("C:");
-    head.next = firstDirectory;
+    Position rootDirectory = createDirectory("C:");
+    head.next = rootDirectory;
 
-    Position currentDirectory = firstDirectory;
+    Position currentDirectory = rootDirectory;
 
     while (1) {
         printf("\nMenu:\n");
@@ -51,29 +51,29 @@ int main() {
 
         if (strcmp(choice, "1") == 0) {
             char directoryName[MAX_NAME_LENGTH];
-            printf("Enter directory name: ");
+            printf("\033[0;32mEnter directory name: \033[0m");
             scanf("%s", directoryName);
             createSubdirectory(directoryName, currentDirectory);
         }
         else if (strcmp(choice, "2") == 0) {
             char directoryName[MAX_NAME_LENGTH];
-            printf("Enter directory name: ");
+            printf("\033[0;32mEnter directory name: \033[0m");
             scanf("%s", directoryName);
             currentDirectory = changeDirectory(directoryName, currentDirectory);
         } else if (strcmp(choice, "3") == 0) {
-            currentDirectory = goUpOneLevel(currentDirectory, firstDirectory);
+            currentDirectory = goUpOneLevel(currentDirectory, rootDirectory);
         } else if (strcmp(choice, "4") == 0) {
             listDirectoryContents(currentDirectory);
         } else if (strcmp(choice, "5") == 0) {
             printf("Exiting the program.\n");
             break;
         } else {
-            printf("Invalid choice. Please enter a valid option.\n");
+            printf("\033[0;31mInvalid choice. Please enter a valid option.\033[0m\n");
         }
     }
 
     // Free allocated memory
-    free(firstDirectory);
+    free(rootDirectory);
 
     return 0;
 }
@@ -94,6 +94,10 @@ Position createDirectory(char name[MAX_NAME_LENGTH]) {
 Position createSubdirectory(char name[MAX_NAME_LENGTH], Position currentDirectory) {
     Position newDirectory = NULL;
     newDirectory = createDirectory(name);
+    if (!newDirectory) {
+        printf("New directory wasn't created!\n");
+        return NULL;
+    }
     newDirectory->next = currentDirectory->subDirectories;
     currentDirectory->subDirectories = newDirectory;
     return newDirectory;
@@ -114,14 +118,31 @@ Position changeDirectory(char name[MAX_NAME_LENGTH], Position currentDirectory) 
 Position goUpOneLevel(Position currentDirectory, Position rootDirectory) {
     if (currentDirectory != rootDirectory) {
         Position parent = rootDirectory;
+        Position current = parent->subDirectories;
         while (parent != NULL) {
+            while (current != NULL) {
+                
+            }
+        }
+        /*while (parent != NULL) {
             if (parent->subDirectories == currentDirectory) {
                 return parent;
             }
             parent = parent->next;
         }
         printf("Error: Parent directory not found.\n");
-        return currentDirectory;
+        return currentDirectory;*/
+        /*
+        * // Find the parent directory by checking the subdirectories
+    Position parent = root;
+    while (parent != NULL && parent->subDirectories != currentDirectory &&
+           parent->subDirectories != NULL) {
+        parent = parent->subDirectories->next;
+    }
+
+    return parent;
+        */
+
     }
     else {
         printf("Already in the root directory.\n");
@@ -130,13 +151,13 @@ Position goUpOneLevel(Position currentDirectory, Position rootDirectory) {
 }
 
 void listDirectoryContents(Position currentDirectory) {
-    printf("Contents of directory '%s':\n", currentDirectory->name);
+    printf("\033[0;32mContents of directory '%s':\033[0m\n", currentDirectory->name);
     Position subdirectory = currentDirectory->subDirectories;
     while (subdirectory != NULL) {
-        printf(" - %s\n", subdirectory->name);
+        printf("\033[0;32m - %s\033[0m\n", subdirectory->name);
         subdirectory = subdirectory->next;
     }
     if (currentDirectory->subDirectories == NULL) {
-        printf("   (empty)\n");
+        printf("\033[0;32m   (empty)\033[0m\n");
     }
 }
