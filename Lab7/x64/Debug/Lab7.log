@@ -1,2 +1,5 @@
 ﻿  Lab7.c
+C:\Users\duje\OneDrive\Desktop\StrukturePodataka\SPLabovi\Lab7\Lab7.c(188,9): warning C4047: 'return': 'int' differs in levels of indirection from 'void *'
+C:\Users\duje\OneDrive\Desktop\StrukturePodataka\SPLabovi\Lab7\Lab7.c(148): warning C4715: 'goUpOneLevel': not all control paths return a value
+C:\Users\duje\OneDrive\Desktop\StrukturePodataka\SPLabovi\Lab7\Lab7.c(193): warning C4715: 'push': not all control paths return a value
   Lab7.vcxproj -> C:\Users\duje\OneDrive\Desktop\StrukturePodataka\SPLabovi\Lab7\x64\Debug\Lab7.exe

@@ -13,29 +13,45 @@ korištenje DOS naredbi: 1- "md", 2 - "cd dir", 3 - "cd..", 4 - "dir" i 5 – izlaz
 #define MAX_NAME_LENGTH 50
 
 struct _directory;
-typedef struct _directory* Position;
+typedef struct _directory* PositionDirectory;
 typedef struct _directory {
     char name[MAX_NAME_LENGTH];
-    Position subDirectories;
-    Position next;
+    PositionDirectory subDirectories;
+    PositionDirectory next;
 } Directory;
 
-Position createDirectory(char name[MAX_NAME_LENGTH]);
-Position createSubdirectory(char name[MAX_NAME_LENGTH], Position currentDirectory);
-Position changeDirectory(char name[MAX_NAME_LENGTH], Position currentDirectory);
-Position goUpOneLevel(Position currentDirectory, Position rootDirectory);
-void listDirectoryContents(Position currentDirectory);
+struct _levelStack;
+typedef struct _levelStack* PositionLevelStack;
+typedef struct _levelStack {
+    PositionDirectory directoryLevel;
+    PositionLevelStack next;
+} LevelStack;
+
+PositionDirectory createDirectory(char name[MAX_NAME_LENGTH]);
+PositionDirectory createSubdirectory(char name[MAX_NAME_LENGTH], PositionDirectory currentDirectory);
+PositionDirectory changeDirectory(char name[MAX_NAME_LENGTH], PositionDirectory currentDirectory);
+int listDirectoryContents(PositionDirectory currentDirectory);
+
+PositionDirectory pop(PositionLevelStack headLevelStack);
+int push(PositionLevelStack headLevelStack, PositionDirectory directoryLevel);
+PositionLevelStack createNewLevelStackElement(PositionDirectory directoryLevel);
 
 int main() {
-    Directory head = {
+    Directory headDirectory = {
         .name = {0},
         .subDirectories = NULL,
         .next = NULL
     };
-    Position rootDirectory = createDirectory("C:");
-    head.next = rootDirectory;
+    PositionDirectory rootDirectory = createDirectory("C:");
+    headDirectory.next = rootDirectory;
 
-    Position currentDirectory = rootDirectory;
+    PositionDirectory currentDirectory = rootDirectory;
+
+    LevelStack headLevelStack = {
+        .directoryLevel = NULL,
+        .next = NULL
+    };
+    push(&headLevelStack, currentDirectory);
 
     while (1) {
         printf("\nMenu:\n");
@@ -60,8 +76,16 @@ int main() {
             printf("\033[0;32mEnter directory name: \033[0m");
             scanf("%s", directoryName);
             currentDirectory = changeDirectory(directoryName, currentDirectory);
+            push(&headLevelStack, currentDirectory);
         } else if (strcmp(choice, "3") == 0) {
-            currentDirectory = goUpOneLevel(currentDirectory, rootDirectory);
+            if (currentDirectory != rootDirectory) {
+                currentDirectory = pop(&headLevelStack);
+                printf("\033[0;32mCurrently in '%s' \033[0m\n", currentDirectory->name);
+            }
+            else {
+                printf("Already in the root directory.\n");
+                return currentDirectory;
+            }
         } else if (strcmp(choice, "4") == 0) {
             listDirectoryContents(currentDirectory);
         } else if (strcmp(choice, "5") == 0) {
@@ -78,9 +102,11 @@ int main() {
     return 0;
 }
 
-Position createDirectory(char name[MAX_NAME_LENGTH]) {
-    Position newDirectory = NULL;
-    newDirectory = (Position)malloc(sizeof(Directory));
+/*Directory functions*/
+
+PositionDirectory createDirectory(char name[MAX_NAME_LENGTH]) {
+    PositionDirectory newDirectory = NULL;
+    newDirectory = (PositionDirectory)malloc(sizeof(Directory));
     if (!newDirectory) {
         printf("Can't allocate memory!\n");
         return NULL;
@@ -91,8 +117,8 @@ Position createDirectory(char name[MAX_NAME_LENGTH]) {
     return newDirectory;
 }
 
-Position createSubdirectory(char name[MAX_NAME_LENGTH], Position currentDirectory) {
-    Position newDirectory = NULL;
+PositionDirectory createSubdirectory(char name[MAX_NAME_LENGTH], PositionDirectory currentDirectory) {
+    PositionDirectory newDirectory = NULL;
     newDirectory = createDirectory(name);
     if (!newDirectory) {
         printf("New directory wasn't created!\n");
@@ -103,8 +129,8 @@ Position createSubdirectory(char name[MAX_NAME_LENGTH], Position currentDirector
     return newDirectory;
 }
 
-Position changeDirectory(char name[MAX_NAME_LENGTH], Position currentDirectory) {
-    Position subdirectory = currentDirectory->subDirectories;
+PositionDirectory changeDirectory(char name[MAX_NAME_LENGTH], PositionDirectory currentDirectory) {
+    PositionDirectory subdirectory = currentDirectory->subDirectories;
     while (subdirectory != NULL) {
         if (strcmp(subdirectory->name, name) == 0) {
             return subdirectory;
@@ -115,44 +141,9 @@ Position changeDirectory(char name[MAX_NAME_LENGTH], Position currentDirectory) 
     return currentDirectory;
 }
 
-Position goUpOneLevel(Position currentDirectory, Position rootDirectory) {
-    if (currentDirectory != rootDirectory) {
-        Position parent = rootDirectory;
-        Position current = parent->subDirectories;
-        while (parent != NULL) {
-            while (current != NULL) {
-                
-            }
-        }
-        /*while (parent != NULL) {
-            if (parent->subDirectories == currentDirectory) {
-                return parent;
-            }
-            parent = parent->next;
-        }
-        printf("Error: Parent directory not found.\n");
-        return currentDirectory;*/
-        /*
-        * // Find the parent directory by checking the subdirectories
-    Position parent = root;
-    while (parent != NULL && parent->subDirectories != currentDirectory &&
-           parent->subDirectories != NULL) {
-        parent = parent->subDirectories->next;
-    }
-
-    return parent;
-        */
-
-    }
-    else {
-        printf("Already in the root directory.\n");
-        return currentDirectory;
-    }
-}
-
-void listDirectoryContents(Position currentDirectory) {
+int listDirectoryContents(PositionDirectory currentDirectory) {
     printf("\033[0;32mContents of directory '%s':\033[0m\n", currentDirectory->name);
-    Position subdirectory = currentDirectory->subDirectories;
+    PositionDirectory subdirectory = currentDirectory->subDirectories;
     while (subdirectory != NULL) {
         printf("\033[0;32m - %s\033[0m\n", subdirectory->name);
         subdirectory = subdirectory->next;
@@ -160,4 +151,52 @@ void listDirectoryContents(Position currentDirectory) {
     if (currentDirectory->subDirectories == NULL) {
         printf("\033[0;32m   (empty)\033[0m\n");
     }
+    return EXIT_SUCCESS;
+}
+
+/*Stack functions*/
+
+PositionDirectory pop(PositionLevelStack headLevelStack) {
+    PositionLevelStack toDelete = NULL;
+    PositionDirectory directoryLevel = NULL;
+
+    toDelete = headLevelStack->next;
+    if (!toDelete) {
+        printf("Stack is empty! Nothing to pop!\n");
+        return NULL;
+    }
+
+    headLevelStack->next = toDelete->next;
+    directoryLevel = toDelete->directoryLevel;
+    free(toDelete);
+
+    return directoryLevel;
+}
+
+int push(PositionLevelStack headLevelStack, PositionDirectory directoryLevel) {
+    PositionLevelStack newLevelStackElement = NULL;
+
+    newLevelStackElement = createNewLevelStackElement(directoryLevel);
+    if (!newLevelStackElement) {
+        perror("Error in creating new element!\n");
+        return NULL;
+    }
+
+    newLevelStackElement->next = headLevelStack->next;
+    headLevelStack->next = newLevelStackElement;
+}
+
+PositionLevelStack createNewLevelStackElement(PositionDirectory directoryLevel) {
+    PositionLevelStack newLevelStackElement = NULL;
+
+    newLevelStackElement = (PositionLevelStack)malloc(sizeof(LevelStack));
+    if (!newLevelStackElement) {
+        perror("Can't allocate memory!\n");
+        return NULL;
+    }
+
+    newLevelStackElement->directoryLevel = directoryLevel;
+    newLevelStackElement->next = NULL;
+
+    return newLevelStackElement;
 }
