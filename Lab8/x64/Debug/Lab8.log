@@ -1,0 +1,5 @@
+﻿  Lab8.c
+C:\Users\duje\OneDrive\Desktop\StrukturePodataka\SPLabovi\Lab8\Lab8.c(53,13): warning C4013: 'strcmp' undefined; assuming extern returning int
+C:\Users\duje\OneDrive\Desktop\StrukturePodataka\SPLabovi\Lab8\Lab8.c(162,9): warning C4033: 'levelOrder' must return a value
+C:\Users\duje\OneDrive\Desktop\StrukturePodataka\SPLabovi\Lab8\Lab8.c(182): warning C4715: 'levelOrder': not all control paths return a value
+  Lab8.vcxproj -> C:\Users\duje\OneDrive\Desktop\StrukturePodataka\SPLabovi\Lab8\x64\Debug\Lab8.exe
