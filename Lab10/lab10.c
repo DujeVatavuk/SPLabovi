@@ -27,24 +27,26 @@ typedef struct _country
 	CountryPosition next;
 	CountryPosition left;
 	CountryPosition right;
-	TownPosition townTreeRoot;
+	TownPosition townRootTree;
 	Town townListHead;
 } Country;
 
-CountryPosition readAndFillCountries(CountryPosition countryHeadList, CountryPosition countryHeadTree);
+CountryPosition readAndFillCountries(CountryPosition countryHeadList, CountryPosition countryRootTree);
 int createNewCountryFromBuffer(char* countryName, char* countryFile, CountryPosition* countries);
 CountryPosition createNewCountry(char* countryName);
 TownPosition createNewTown(char* townName, int townPopulation);
-int insertSortedNewTownList(TownPosition townHead, TownPosition newTown);
+int insertSortedNewTownList(TownPosition townHeadList, TownPosition newTown);
 int insertTownAfter(TownPosition townCurrent, TownPosition newTown);
-TownPosition insertNewTownTree(TownPosition root, TownPosition newTownTree);
-int insertSortedNewCountryList(CountryPosition townHead, CountryPosition newCountry);
+TownPosition insertNewTownTree(TownPosition townRootTree, TownPosition newTown);
+int insertSortedNewCountryList(CountryPosition townHeadList, CountryPosition newCountry);
 int insertCountryAfter(CountryPosition countryCurrent, CountryPosition newCountry);
-CountryPosition insertNewCountryTree(CountryPosition root, CountryPosition newCountry);
+CountryPosition insertNewCountryTree(CountryPosition countryRootTree, CountryPosition newCountry);
 int printCountryList(CountryPosition countryHeadList);
-int printCountryTree(CountryPosition countryHeadTree);
+int printCountryTree(CountryPosition countryRootTree);
 int printTownList(TownPosition townHeadList);
-int printTownTree(TownPosition townHeadTree);
+int printTownTree(TownPosition townRootTree);
+int findCountries(CountryPosition countryHeadList, CountryPosition countryRootTree, CountryPosition* countries);
+CountryPosition searchCountryTree(CountryPosition countryRootTree, char* countryName);
 
 int main() {
 	Country countryHeadList = {
@@ -52,7 +54,7 @@ int main() {
 		.next = NULL,
 		.left = NULL,
 		.right = NULL,
-		.townTreeRoot = NULL,
+		.townRootTree = NULL,
 		.townListHead = {
 			.name = { 0 },
 			.population = 0,
@@ -62,19 +64,30 @@ int main() {
 		}
 	};
 
-	CountryPosition countryHeadTree = NULL;
+	CountryPosition countryRootTree = NULL;
 
-	countryHeadTree = readAndFillCountries(&countryHeadList, countryHeadTree);
+	CountryPosition countryCurrentList = NULL;
+	CountryPosition countryCurrentTree = NULL;
+	CountryPosition countries[] = { NULL, NULL };
+
+	countryRootTree = readAndFillCountries(&countryHeadList, countryRootTree);
 	printCountryList(&countryHeadList);
 	printf("\n\n\n\n");
-	printCountryTree(countryHeadTree);
+	printCountryTree(countryRootTree);
 
-	//articleInBetweenDates("Jabuka", "2023-11-10", "2023-11-17", receiptHead.next);
+	findCountries(&countryHeadList, countryRootTree, countries);
+
+	countryCurrentList = countries[0];
+	countryCurrentTree = countries[1];
+
+	printf("\nCountry list: %s", countryCurrentList->name);
+	printf("\nCountry tree: %s", countryCurrentTree->name);
+
 
 	return EXIT_SUCCESS;
 }
 
-CountryPosition readAndFillCountries(CountryPosition countryHeadList, CountryPosition countryHeadTree) {
+CountryPosition readAndFillCountries(CountryPosition countryHeadList, CountryPosition countryRootTree) {
 	FILE* filePointer = NULL;
 	char countryName[MAX_LINE] = { 0 };
 	char countryFile[MAX_LINE] = { 0 };
@@ -95,14 +108,14 @@ CountryPosition readAndFillCountries(CountryPosition countryHeadList, CountryPos
 		newCountryList = countries[0];
 		newCountryTree = countries[1];
 		insertSortedNewCountryList(countryHeadList, newCountryList);
-		countryHeadTree = insertNewCountryTree(countryHeadTree, newCountryTree);
+		countryRootTree = insertNewCountryTree(countryRootTree, newCountryTree);
 		strcpy(countryName, nullString);// provjeri treba li
 		strcpy(countryFile, nullString);// provjeri treba li
 	}
 
 	fclose(filePointer);
 
-	return countryHeadTree;
+	return countryRootTree;
 }
 
 int createNewCountryFromBuffer(char* countryName, char* countryFile, CountryPosition* countries) {
@@ -111,7 +124,7 @@ int createNewCountryFromBuffer(char* countryName, char* countryFile, CountryPosi
 	CountryPosition newCountryList = NULL;
 	CountryPosition newCountryTree = NULL;
 	TownPosition newTownList = NULL;
-	TownPosition newTownTree = NULL;
+	TownPosition newTown = NULL;
 	char townName[MAX_LENGTH] = { 0 };
 	int townPopulation = 0;
 
@@ -129,9 +142,9 @@ int createNewCountryFromBuffer(char* countryName, char* countryFile, CountryPosi
 	while (!feof(countryFilePointer)) {
 		fscanf(countryFilePointer, " %s %d", townName, &townPopulation);
 		newTownList = createNewTown(townName, townPopulation);
-		newTownTree = createNewTown(townName, townPopulation);
+		newTown = createNewTown(townName, townPopulation);
 		insertSortedNewTownList(&newCountryTree->townListHead, newTownList);
-		newCountryList->townTreeRoot = insertNewTownTree(newCountryList->townTreeRoot, newTownTree);
+		newCountryList->townRootTree = insertNewTownTree(newCountryList->townRootTree, newTown);
 		newTownList = NULL;// provjeri treba li
 	}
 	countries[0] = newCountryList;
@@ -155,8 +168,8 @@ CountryPosition createNewCountry(char* countryName) {
 	country->next = NULL;
 	country->left = NULL;
 	country->right = NULL;
-	country->townTreeRoot = NULL;
-	//strcpy(country->townHead.name, NULL);
+	country->townRootTree = NULL;
+	//strcpy(country->townHeadList.name, NULL);
 	country->townListHead.population = 0;
 	country->townListHead.next = NULL;
 	country->townListHead.left = NULL;
@@ -182,8 +195,8 @@ TownPosition createNewTown(char* townName, int townPopulation) {
 	return town;
 }
 
-int insertSortedNewTownList(TownPosition townHead, TownPosition newTown) {
-	TownPosition townCurrent = townHead;
+int insertSortedNewTownList(TownPosition townHeadList, TownPosition newTown) {
+	TownPosition townCurrent = townHeadList;
 	while (townCurrent->next != NULL && townCurrent->next->population > newTown->population) {
 		townCurrent = townCurrent->next;
 	}
@@ -200,20 +213,20 @@ int insertTownAfter(TownPosition townCurrent, TownPosition newTown) {
 	return EXIT_SUCCESS;
 }
 
-TownPosition insertNewTownTree(TownPosition townTreeRoot, TownPosition newTownTree) {
-	if (townTreeRoot == NULL)
-		return newTownTree;
+TownPosition insertNewTownTree(TownPosition townRootTree, TownPosition newTown) {
+	if (townRootTree == NULL)
+		return newTown;
 
-	if (newTownTree->population > townTreeRoot->population)//dodaj provjeru po imenima naknadno...
-		townTreeRoot->left = insertNewTownTree(townTreeRoot->left, newTownTree);
-	else if (newTownTree->population <= townTreeRoot->population)
-		townTreeRoot->right = insertNewTownTree(townTreeRoot->right, newTownTree);
+	if (newTown->population > townRootTree->population)//dodaj provjeru po imenima naknadno...
+		townRootTree->left = insertNewTownTree(townRootTree->left, newTown);
+	else if (newTown->population <= townRootTree->population)
+		townRootTree->right = insertNewTownTree(townRootTree->right, newTown);
 
-	return townTreeRoot;
+	return townRootTree;
 }
 
-int insertSortedNewCountryList(CountryPosition townHead, CountryPosition newCountry) {
-	CountryPosition countryCurrent = townHead;
+int insertSortedNewCountryList(CountryPosition townHeadList, CountryPosition newCountry) {
+	CountryPosition countryCurrent = townHeadList;
 	while (countryCurrent->next != NULL && strcmp(countryCurrent->next->name, newCountry->name) < 0) {
 		countryCurrent = countryCurrent->next;
 	}
@@ -230,33 +243,33 @@ int insertCountryAfter(CountryPosition countryCurrent, CountryPosition newCountr
 	return EXIT_SUCCESS;
 }
 
-CountryPosition insertNewCountryTree(CountryPosition countryTreeRoot, CountryPosition newCountry) {
-	if (countryTreeRoot == NULL)
+CountryPosition insertNewCountryTree(CountryPosition countryRootTree, CountryPosition newCountry) {
+	if (countryRootTree == NULL)
 		return newCountry;
 
-	if (strcmp(countryTreeRoot->name, newCountry->name) > 0)
-		countryTreeRoot->left = insertNewCountryTree(countryTreeRoot->left, newCountry);
-	else if (strcmp(countryTreeRoot->name, newCountry->name) <= 0)
-		countryTreeRoot->right = insertNewCountryTree(countryTreeRoot->right, newCountry);
+	if (strcmp(countryRootTree->name, newCountry->name) > 0)
+		countryRootTree->left = insertNewCountryTree(countryRootTree->left, newCountry);
+	else if (strcmp(countryRootTree->name, newCountry->name) <= 0)
+		countryRootTree->right = insertNewCountryTree(countryRootTree->right, newCountry);
 
-	return countryTreeRoot;
+	return countryRootTree;
 }
 
 int printCountryList(CountryPosition countryHeadList) {
 	CountryPosition currentCountry = countryHeadList->next;
 	while (currentCountry != NULL) {
 		printf("\n%s", currentCountry->name);
-		printTownTree(currentCountry->townTreeRoot);
+		printTownTree(currentCountry->townRootTree);
 		currentCountry = currentCountry->next;
 	}
 }
 
-int printCountryTree(CountryPosition countryHeadTree) {
-	if (countryHeadTree) {
-		printCountryTree(countryHeadTree->left);
-		printf("\n%s", countryHeadTree->name);
-		printTownList(&countryHeadTree->townListHead);
-		printCountryTree(countryHeadTree->right);
+int printCountryTree(CountryPosition countryRootTree) {
+	if (countryRootTree) {
+		printCountryTree(countryRootTree->left);
+		printf("\n%s", countryRootTree->name);
+		printTownList(&countryRootTree->townListHead);
+		printCountryTree(countryRootTree->right);
 	}
 	return EXIT_SUCCESS;
 }
@@ -269,11 +282,40 @@ int printTownList(TownPosition townHeadList) {
 	}
 }
 
-int printTownTree(TownPosition townHeadTree) {
-	if (townHeadTree) {
-		printTownTree(townHeadTree->left);
-		printf("\n\t%s %d", townHeadTree->name, townHeadTree->population);
-		printTownTree(townHeadTree->right);
+int printTownTree(TownPosition townRootTree) {
+	if (townRootTree) {
+		printTownTree(townRootTree->left);
+		printf("\n\t%s %d", townRootTree->name, townRootTree->population);
+		printTownTree(townRootTree->right);
 	}
 	return EXIT_SUCCESS;
+}
+
+int findCountries(CountryPosition countryHeadList, CountryPosition countryRootTree, CountryPosition* countries) {
+	CountryPosition countryCurrentList = countryHeadList->next;
+	CountryPosition countryCurrentTree = countryRootTree;
+	char countryName[MAX_LENGTH] = { 0 };
+	printf("\n\nEnter country name: ");
+	scanf(" %s", countryName);
+
+	while (countryCurrentList != NULL && strcmp(countryCurrentList->name, countryName)) {
+		countryCurrentList = countryCurrentList->next;
+	}
+
+	countryCurrentTree = searchCountryTree(countryRootTree, countryName);
+
+	countries[0] = countryCurrentList;
+	countries[1] = countryCurrentTree;
+
+	return EXIT_SUCCESS;
+}
+
+CountryPosition searchCountryTree(CountryPosition countryRootTree, char* countryName) {
+	if (countryRootTree == NULL || strcmp(countryRootTree->name, countryName) == 0)
+		return countryRootTree;
+
+	if (strcmp(countryRootTree->name, countryName) > 0)
+		return searchCountryTree(countryRootTree->left, countryName);
+
+	return searchCountryTree(countryRootTree->right, countryName);
 }
