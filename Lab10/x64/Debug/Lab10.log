@@ -1,5 +1,6 @@
 ﻿  lab10.c
-C:\Users\duje\OneDrive\Desktop\StrukturePodataka\SPLabovi\Lab10\lab10.c(102,3): warning C4047: 'return': 'CountryPosition' differs in levels of indirection from 'int'
-C:\Users\duje\OneDrive\Desktop\StrukturePodataka\SPLabovi\Lab10\lab10.c(283): warning C4716: 'printTownList': must return a value
-C:\Users\duje\OneDrive\Desktop\StrukturePodataka\SPLabovi\Lab10\lab10.c(265): warning C4716: 'printCountryList': must return a value
+C:\Users\duje\OneDrive\Desktop\StrukturePodataka\SPLabovi\Lab10\lab10.c(198,3): warning C4047: 'return': 'CountryPosition' differs in levels of indirection from 'int'
+C:\Users\duje\OneDrive\Desktop\StrukturePodataka\SPLabovi\Lab10\lab10.c(121): warning C4716: 'printAllCountriesFromHash': must return a value
+C:\Users\duje\OneDrive\Desktop\StrukturePodataka\SPLabovi\Lab10\lab10.c(369): warning C4716: 'printCountryList': must return a value
+C:\Users\duje\OneDrive\Desktop\StrukturePodataka\SPLabovi\Lab10\lab10.c(387): warning C4716: 'printTownList': must return a value
   Lab10.vcxproj -> C:\Users\duje\OneDrive\Desktop\StrukturePodataka\SPLabovi\Lab10\x64\Debug\Lab10.exe
